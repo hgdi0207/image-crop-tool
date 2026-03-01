@@ -1,0 +1,33 @@
+{
+  "upload": {
+    "title": "Drop your image here",
+    "subtitle": "JPG · PNG · WEBP · GIF · BMP · SVG",
+    "maxSize": "Max 20 MB",
+    "chooseFile": "Choose File",
+    "or": "or",
+    "pasteHint": "Paste image   Ctrl+V",
+    "urlLabel": "Import from URL",
+    "urlPlaceholder": "https://...",
+    "urlImport": "Import",
+    "batchLink": "Batch process multiple images →",
+    "dragActive": "Release to upload",
+    "errors": {
+      "unsupportedFormat": "Unsupported format. Please upload JPG, PNG, WEBP, GIF, BMP, or SVG.",
+      "fileTooLarge": "File too large. Maximum size is 20 MB.",
+      "corrupted": "Could not read file. The file may be corrupted.",
+      "urlFailed": "Failed to load image. Check the URL or download the image and upload it directly.",
+      "downsamplePromptTitle": "Large Image Detected",
+      "downsamplePromptDesc": "This image is large ({width} × {height}). Downsampling is recommended for better performance.",
+      "downsampleConfirm": "Downsample & Continue",
+      "downsampleSkip": "Continue Anyway"
+    }
+  },
+  "nav": {
+    "help": "Help",
+    "reupload": "Re-upload"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark"
+  }
+}

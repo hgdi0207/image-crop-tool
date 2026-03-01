@@ -1,0 +1,33 @@
+{
+  "upload": {
+    "title": "拖拽图片到此处",
+    "subtitle": "JPG · PNG · WEBP · GIF · BMP · SVG",
+    "maxSize": "最大 20 MB",
+    "chooseFile": "选择文件",
+    "or": "或",
+    "pasteHint": "粘贴图片   Ctrl+V",
+    "urlLabel": "从 URL 导入",
+    "urlPlaceholder": "https://...",
+    "urlImport": "导入",
+    "batchLink": "批量处理多张图片 →",
+    "dragActive": "松开即可上传",
+    "errors": {
+      "unsupportedFormat": "不支持的格式，请上传 JPG、PNG、WEBP、GIF、BMP 或 SVG。",
+      "fileTooLarge": "文件过大，最大支持 20 MB。",
+      "corrupted": "无法读取文件，文件可能已损坏。",
+      "urlFailed": "图片加载失败，请检查 URL 或下载后直接上传。",
+      "downsamplePromptTitle": "图片尺寸较大",
+      "downsamplePromptDesc": "图片分辨率为 {width} × {height}，建议降采样以提升性能。",
+      "downsampleConfirm": "降采样并继续",
+      "downsampleSkip": "直接继续"
+    }
+  },
+  "nav": {
+    "help": "帮助",
+    "reupload": "重新上传"
+  },
+  "theme": {
+    "light": "浅色",
+    "dark": "深色"
+  }
+}
