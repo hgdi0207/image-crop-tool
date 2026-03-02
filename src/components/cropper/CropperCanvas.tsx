@@ -31,6 +31,7 @@ interface Props {
   flipV: boolean
   guides: GuideSettings
   showCheckerboard: boolean
+  dragMode: 'crop' | 'none' | 'move'
   onCropData: (w: number, h: number) => void
   onZoomChange: (multiplier: number) => void
   onReady: (handle: CropperHandle) => void
@@ -44,6 +45,7 @@ export default function CropperCanvas({
   flipV,
   guides,
   showCheckerboard,
+  dragMode,
   onCropData,
   onZoomChange,
   onReady,
@@ -59,6 +61,13 @@ export default function CropperCanvas({
     if (!c || !readyRef.current) return
     c.setAspectRatio(aspectRatio ?? NaN)
   }, [aspectRatio])
+
+  // Apply drag mode (crop = adjust crop box, move = pan canvas)
+  useEffect(() => {
+    const c = cropperRef.current?.cropper
+    if (!c || !readyRef.current) return
+    c.setDragMode(dragMode)
+  }, [dragMode])
 
   // Apply rotation and flip via setData (absolute values)
   useEffect(() => {

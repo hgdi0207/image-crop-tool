@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { Scissors, Minus, Plus } from 'lucide-react'
+import { Scissors, Minus, Plus, Hand } from 'lucide-react'
 import { useCropStore } from '@/store/cropStore'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
@@ -29,14 +29,17 @@ export default function EditorClient() {
   const flipH = useCropStore((s) => s.flipH)
   const flipV = useCropStore((s) => s.flipV)
   const aspectRatio = useCropStore((s) => s.aspectRatio)
+  const cropMode = useCropStore((s) => s.cropMode)
   const clearImage = useCropStore((s) => s.clearImage)
 
   const [zoomMultiplier, setZoomMultiplier] = useState(1)
   const [zoomInputStr, setZoomInputStr] = useState('100')
   const [guides, setGuides] = useState<GuideSettings>({ grid: false, thirds: false, golden: false })
   const [cropDimensions, setCropDimensions] = useState({ w: 0, h: 0 })
+  const [dragMode, setDragMode] = useState<'none' | 'move'>('none')
 
   const cropperHandleRef = useRef<CropperHandle | null>(null)
+  const spaceBeforeModeRef = useRef<'none' | 'move' | null>(null)
 
   // Redirect to upload if no image is loaded
   useEffect(() => {
@@ -47,6 +50,31 @@ export default function EditorClient() {
   useEffect(() => {
     setZoomInputStr(String(Math.round(zoomMultiplier * 100)))
   }, [zoomMultiplier])
+
+  // Space → temporary pan mode (desktop); release → restore previous mode
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+      if (e.key === ' ' && spaceBeforeModeRef.current === null) {
+        e.preventDefault()
+        spaceBeforeModeRef.current = dragMode
+        setDragMode('move')
+      }
+    }
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.key === ' ' && spaceBeforeModeRef.current !== null) {
+        setDragMode(spaceBeforeModeRef.current)
+        spaceBeforeModeRef.current = null
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('keyup', onKeyUp)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('keyup', onKeyUp)
+    }
+  }, [dragMode])
 
   // Arrow key nudge + Delete shortcut
   useEffect(() => {
@@ -119,6 +147,10 @@ export default function EditorClient() {
     c.setData({ ...c.getData(), width: w, height: h })
   }
 
+  // Pan active → move; Free (no pan) → crop (allow re-draw); Preset/Custom (no pan) → none
+  const effectiveDragMode: 'crop' | 'move' | 'none' =
+    dragMode === 'move' ? 'move' : cropMode === 'free' ? 'crop' : 'none'
+
   const isTransparent =
     originalFile?.type === 'image/png' || originalFile?.type === 'image/webp'
 
@@ -160,6 +192,7 @@ export default function EditorClient() {
               flipV={flipV}
               guides={guides}
               showCheckerboard={!!isTransparent}
+              dragMode={effectiveDragMode}
               onCropData={(w, h) => setCropDimensions({ w, h })}
               onZoomChange={setZoomMultiplier}
               onReady={(handle) => { cropperHandleRef.current = handle }}
@@ -197,6 +230,17 @@ export default function EditorClient() {
             <span className="text-xs text-muted-foreground shrink-0">%</span>
             <Button variant="ghost" size="sm" className="h-6 px-2 text-xs shrink-0" onClick={handleZoomReset}>
               Reset
+            </Button>
+
+            <Button
+              variant={dragMode === 'move' ? 'default' : 'ghost'}
+              size="sm"
+              className="h-6 px-2 text-xs shrink-0 gap-1"
+              onClick={() => setDragMode(dragMode === 'move' ? 'none' : 'move')}
+              title="Pan mode — hold Space to activate temporarily"
+            >
+              <Hand className="w-3 h-3" />
+              Pan
             </Button>
 
             <div className="h-4 border-l mx-1" />
