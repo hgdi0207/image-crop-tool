@@ -4,10 +4,14 @@ import { useEffect, useRef, useState } from 'react'
 import Cropper from 'react-cropper'
 import 'cropperjs/dist/cropper.css'
 import type { ReactCropperElement } from 'react-cropper'
+import type { CropData } from '@/types'
 
 export interface CropperHandle {
   getCropper: () => Cropper | undefined
   setZoom: (multiplier: number) => void
+  getCroppedCanvas: (opts?: Cropper.GetCroppedCanvasOptions) => HTMLCanvasElement | null
+  getCropData: () => CropData | null
+  queueCropRestore: (data: CropData | null) => void
 }
 
 interface CropBoxPos {
@@ -35,6 +39,8 @@ interface Props {
   onCropData: (w: number, h: number) => void
   onZoomChange: (multiplier: number) => void
   onReady: (handle: CropperHandle) => void
+  onCropStart?: () => void
+  onCropEnd?: () => void
 }
 
 export default function CropperCanvas({
@@ -49,6 +55,8 @@ export default function CropperCanvas({
   onCropData,
   onZoomChange,
   onReady,
+  onCropStart,
+  onCropEnd,
 }: Props) {
   const cropperRef = useRef<ReactCropperElement>(null)
   const readyRef = useRef(false)
@@ -106,6 +114,29 @@ export default function CropperCanvas({
         const init = initZoomRef.current ?? 1
         cropperRef.current?.cropper?.zoomTo(init * multiplier)
       },
+      getCroppedCanvas: (opts) => {
+        return cropperRef.current?.cropper?.getCroppedCanvas(opts) ?? null
+      },
+      getCropData: () => {
+        const cr = cropperRef.current?.cropper
+        if (!cr) return null
+        const d = cr.getData()
+        return {
+          x: d.x,
+          y: d.y,
+          width: Math.max(1, Math.round(Math.abs(d.width))),
+          height: Math.max(1, Math.round(Math.abs(d.height))),
+        }
+      },
+      queueCropRestore: (data) => {
+        if (!data) return
+        // setTimeout(0) fires after React useEffects, so aspect ratio resets settle first
+        setTimeout(() => {
+          const cr = cropperRef.current?.cropper
+          if (!cr) return
+          cr.setData({ x: data.x, y: data.y, width: data.width, height: data.height })
+        }, 0)
+      },
     })
   }
 
@@ -144,6 +175,8 @@ export default function CropperCanvas({
         ready={handleReady}
         crop={updateCropBox}
         zoom={handleZoom as Parameters<typeof Cropper>[0]['zoom']}
+        cropstart={onCropStart as Parameters<typeof Cropper>[0]['cropstart']}
+        cropend={onCropEnd as Parameters<typeof Cropper>[0]['cropend']}
       />
 
       {showGuides && cropBox.width > 0 && (

@@ -1,15 +1,17 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { Scissors, Minus, Plus, Hand } from 'lucide-react'
+import { Scissors, Minus, Plus, Hand, Undo2, Redo2 } from 'lucide-react'
 import { useCropStore } from '@/store/cropStore'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 import { useTheme } from '@/components/ThemeProvider'
 import LeftPanel from '@/components/panels/LeftPanel'
+import ExportPanel from '@/components/export/ExportPanel'
+import { getCroppedBlob, downloadBlob } from '@/lib/exportUtils'
 import type { CropperHandle, GuideSettings } from '@/components/cropper/CropperCanvas'
 
 const CropperCanvas = dynamic(
@@ -31,12 +33,15 @@ export default function EditorClient() {
   const aspectRatio = useCropStore((s) => s.aspectRatio)
   const cropMode = useCropStore((s) => s.cropMode)
   const clearImage = useCropStore((s) => s.clearImage)
+  const historyIndex = useCropStore((s) => s.historyIndex)
+  const historyLength = useCropStore((s) => s.history.length)
 
   const [zoomMultiplier, setZoomMultiplier] = useState(1)
   const [zoomInputStr, setZoomInputStr] = useState('100')
   const [guides, setGuides] = useState<GuideSettings>({ grid: false, thirds: false, golden: false })
   const [cropDimensions, setCropDimensions] = useState({ w: 0, h: 0 })
   const [dragMode, setDragMode] = useState<'none' | 'move'>('none')
+  const [cropVersion, setCropVersion] = useState(0)
 
   const cropperHandleRef = useRef<CropperHandle | null>(null)
   const spaceBeforeModeRef = useRef<'none' | 'move' | null>(null)
@@ -76,18 +81,89 @@ export default function EditorClient() {
     }
   }, [dragMode])
 
-  // Arrow key nudge + Delete shortcut
+  // ─── History helpers ───────────────────────────────────────────────────────
+
+  /**
+   * Capture current state (including live crop box position) and push to stack.
+   * Must be called BEFORE the action that changes state.
+   */
+  const handleHistoryPush = useCallback(() => {
+    const currentCropData = cropperHandleRef.current?.getCropData() ?? null
+    const store = useCropStore.getState()
+    store.setCropData(currentCropData)
+    store.pushHistory()
+  }, [])
+
+  const handleUndo = useCallback(() => {
+    const { history, historyIndex: idx } = useCropStore.getState()
+    if (idx <= 0) return
+    const prevEntry = history[idx - 1]
+    useCropStore.getState().undo()
+    cropperHandleRef.current?.queueCropRestore(prevEntry.cropData)
+    setCropVersion((v) => v + 1)
+  }, [])
+
+  const handleRedo = useCallback(() => {
+    const { history, historyIndex: idx } = useCropStore.getState()
+    if (idx >= history.length - 1) return
+    const nextEntry = history[idx + 1]
+    useCropStore.getState().redo()
+    cropperHandleRef.current?.queueCropRestore(nextEntry.cropData)
+    setCropVersion((v) => v + 1)
+  }, [])
+
+  // cropstart → push history BEFORE the crop box moves
+  const handleCropStart = useCallback(() => {
+    handleHistoryPush()
+  }, [handleHistoryPush])
+
+  // cropend → bump version to refresh preview
+  const handleCropEnd = useCallback(() => {
+    setCropVersion((v) => v + 1)
+  }, [])
+
+  // ─── Keyboard shortcuts ────────────────────────────────────────────────────
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA') return
 
+      // Ctrl+Z / Ctrl+Shift+Z
+      if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault()
+        handleUndo()
+        return
+      }
+      if (e.ctrlKey && e.key === 'z' && e.shiftKey) {
+        e.preventDefault()
+        handleRedo()
+        return
+      }
+      if (e.ctrlKey && e.key === 'y') {
+        e.preventDefault()
+        handleRedo()
+        return
+      }
+
+      // Ctrl+S → download
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault()
+        const canvas = cropperHandleRef.current?.getCroppedCanvas()
+        if (!canvas) return
+        const { exportFormat: fmt, exportQuality: q, exportFilename: fn, exportBgColor: bg } = useCropStore.getState()
+        getCroppedBlob(canvas, fmt, q, bg).then((blob) => downloadBlob(blob, fn, fmt))
+        return
+      }
+
+      // Delete → re-upload
       if (e.key === 'Delete') {
         clearImage()
         router.push(`/${locale}/`)
         return
       }
 
+      // Arrow key nudge
       if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return
       const c = cropperHandleRef.current?.getCropper()
       if (!c) return
@@ -103,7 +179,9 @@ export default function EditorClient() {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [clearImage, router, locale])
+  }, [clearImage, router, locale, handleUndo, handleRedo])
+
+  // ─── Zoom helpers ──────────────────────────────────────────────────────────
 
   const handleReupload = () => {
     clearImage()
@@ -154,6 +232,9 @@ export default function EditorClient() {
   const isTransparent =
     originalFile?.type === 'image/png' || originalFile?.type === 'image/webp'
 
+  const canUndo = historyIndex > 0
+  const canRedo = historyIndex < historyLength - 1
+
   if (!correctedDataUrl) return null
 
   return (
@@ -178,7 +259,11 @@ export default function EditorClient() {
       <div className="flex-1 flex min-h-0">
 
         {/* Left panel */}
-        <LeftPanel onReupload={handleReupload} onCustomSize={handleCustomSize} />
+        <LeftPanel
+          onReupload={handleReupload}
+          onCustomSize={handleCustomSize}
+          onHistoryPush={handleHistoryPush}
+        />
 
         {/* Canvas area */}
         <div className="flex-1 flex flex-col min-w-0">
@@ -196,6 +281,8 @@ export default function EditorClient() {
               onCropData={(w, h) => setCropDimensions({ w, h })}
               onZoomChange={setZoomMultiplier}
               onReady={(handle) => { cropperHandleRef.current = handle }}
+              onCropStart={handleCropStart}
+              onCropEnd={handleCropEnd}
             />
           </div>
 
@@ -270,16 +357,39 @@ export default function EditorClient() {
           </div>
         </div>
 
-        {/* Right panel — placeholder for Batch 3 */}
-        <aside className="w-64 shrink-0 border-l flex flex-col items-center justify-center text-muted-foreground text-xs bg-background">
-          <p>Preview &amp; Export</p>
-          <p className="mt-1 opacity-50">coming in Batch 3</p>
-        </aside>
+        {/* Right panel — Export */}
+        <ExportPanel
+          cropperHandleRef={cropperHandleRef}
+          cropVersion={cropVersion}
+        />
       </div>
 
-      {/* ─── Status bar — placeholder for Batch 3 ─── */}
+      {/* ─── Status bar ─── */}
       <footer className="border-t h-9 px-4 flex items-center justify-between shrink-0 bg-background text-xs text-muted-foreground">
-        <span>Undo / Redo — coming in Batch 3</span>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost" size="icon" className="h-6 w-6"
+            onClick={handleUndo}
+            disabled={!canUndo}
+            title="Undo (Ctrl+Z)"
+          >
+            <Undo2 className="w-3.5 h-3.5" />
+          </Button>
+          <Button
+            variant="ghost" size="icon" className="h-6 w-6"
+            onClick={handleRedo}
+            disabled={!canRedo}
+            title="Redo (Ctrl+Shift+Z)"
+          >
+            <Redo2 className="w-3.5 h-3.5" />
+          </Button>
+          {historyLength > 0 && (
+            <span className="ml-1 opacity-60">
+              {historyIndex + 1} / {historyLength}
+            </span>
+          )}
+        </div>
+        <span className="opacity-50 text-[10px]">Ctrl+Z undo · Ctrl+Shift+Z redo · Ctrl+S download</span>
       </footer>
     </div>
   )

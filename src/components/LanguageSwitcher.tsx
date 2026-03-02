@@ -15,6 +15,7 @@ export default function LanguageSwitcher() {
     // Split by '/', replace segment[1] (the locale), rejoin, then hard-reload
     const segments = window.location.pathname.split('/')
     segments[1] = code
+    // eslint-disable-next-line react-hooks/immutability
     window.location.href = segments.join('/')
   }
 

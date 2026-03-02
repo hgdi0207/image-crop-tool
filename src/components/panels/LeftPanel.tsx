@@ -15,9 +15,10 @@ import type { CropMode, CropPreset } from '@/types'
 interface Props {
   onReupload: () => void
   onCustomSize: (w: number, h: number) => void
+  onHistoryPush?: () => void
 }
 
-export default function LeftPanel({ onReupload, onCustomSize }: Props) {
+export default function LeftPanel({ onReupload, onCustomSize, onHistoryPush }: Props) {
   const rotation = useCropStore((s) => s.rotation)
   const flipH = useCropStore((s) => s.flipH)
   const flipV = useCropStore((s) => s.flipV)
@@ -36,6 +37,7 @@ export default function LeftPanel({ onReupload, onCustomSize }: Props) {
 
   // Rotate 90° with normalization to -180..180
   const rotate90 = (dir: 1 | -1) => {
+    onHistoryPush?.()
     const raw = rotation + dir * 90
     const normalized = raw > 180 ? raw - 360 : raw < -180 ? raw + 360 : raw
     setRotation(normalized)
@@ -44,6 +46,7 @@ export default function LeftPanel({ onReupload, onCustomSize }: Props) {
   const handlePresetSelect = (key: CropPreset) => {
     const preset = PRESET_LIST.find((p) => p.key === key)
     if (!preset) return
+    onHistoryPush?.()
     setSelectedPreset(key, preset.ratio)
   }
 
@@ -86,14 +89,14 @@ export default function LeftPanel({ onReupload, onCustomSize }: Props) {
           <Button
             variant={flipH ? 'default' : 'outline'} size="icon" className="h-8 w-full"
             title="Flip Horizontal"
-            onClick={() => setFlipH(!flipH)}
+            onClick={() => { onHistoryPush?.(); setFlipH(!flipH) }}
           >
             <FlipHorizontal2 className="w-4 h-4" />
           </Button>
           <Button
             variant={flipV ? 'default' : 'outline'} size="icon" className="h-8 w-full"
             title="Flip Vertical"
-            onClick={() => setFlipV(!flipV)}
+            onClick={() => { onHistoryPush?.(); setFlipV(!flipV) }}
           >
             <FlipVertical2 className="w-4 h-4" />
           </Button>
@@ -105,17 +108,20 @@ export default function LeftPanel({ onReupload, onCustomSize }: Props) {
             <span>Angle</span>
             <span>{rotation}°</span>
           </div>
-          <Slider
-            min={-180} max={180} step={1}
-            value={[rotation]}
-            onValueChange={([v]) => setRotation(v)}
-          />
+          {/* onPointerDown captures state BEFORE drag starts */}
+          <div onPointerDown={() => onHistoryPush?.()}>
+            <Slider
+              min={-180} max={180} step={1}
+              value={[rotation]}
+              onValueChange={([v]) => setRotation(v)}
+            />
+          </div>
         </div>
 
         {/* Reset */}
         <Button
           variant="ghost" size="sm" className="w-full text-xs"
-          onClick={resetAdjustments}
+          onClick={() => { onHistoryPush?.(); resetAdjustments() }}
         >
           <RefreshCw className="w-3 h-3 mr-1" />
           Reset
@@ -134,6 +140,7 @@ export default function LeftPanel({ onReupload, onCustomSize }: Props) {
             <button
               key={m}
               onClick={() => {
+                onHistoryPush?.()
                 setCropMode(m)
                 if (m === 'free') setSelectedPreset(null, null)
               }}
