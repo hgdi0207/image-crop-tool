@@ -108,11 +108,14 @@ export const useCropStore = create<CropStore>((set, get) => ({
 
   setCropMode: (mode) => set({ cropMode: mode }),
 
-  setSelectedPreset: (preset, ratio) => set({
+  setSelectedPreset: (preset, ratio) => set((state) => ({
     selectedPreset: preset,
     aspectRatio: ratio,
-    cropMode: preset === 'FreeForm' ? 'free' : preset === 'Custom' ? 'custom' : 'ratio',
-  }),
+    cropMode:
+      preset === null ? state.cropMode :
+      preset === 'FreeForm' ? 'free' :
+      preset === 'Custom' ? 'custom' : 'ratio',
+  })),
 
   setCropData: (data) => set({ cropData: data }),
 

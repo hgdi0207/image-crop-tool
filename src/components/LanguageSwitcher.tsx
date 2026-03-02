@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter, usePathname } from 'next/navigation'
+import { useLocale } from 'next-intl'
 
 const LOCALES = [
   { code: 'en', label: 'EN' },
@@ -8,15 +8,14 @@ const LOCALES = [
 ]
 
 export default function LanguageSwitcher() {
-  const router = useRouter()
-  const pathname = usePathname()
-
-  const currentLocale = LOCALES.find((l) => pathname.startsWith(`/${l.code}`))?.code ?? 'en'
+  const currentLocale = useLocale()
 
   const switchLocale = (code: string) => {
-    const segments = pathname.split('/')
+    // window.location.pathname always includes the locale prefix, e.g. '/en' or '/en/editor'
+    // Split by '/', replace segment[1] (the locale), rejoin, then hard-reload
+    const segments = window.location.pathname.split('/')
     segments[1] = code
-    router.push(segments.join('/'))
+    window.location.href = segments.join('/')
   }
 
   return (

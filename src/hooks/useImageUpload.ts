@@ -51,35 +51,20 @@ export function useImageUpload() {
     onDownsampleConfirm?: (w: number, h: number) => Promise<boolean>
   ) => {
     if (!url.trim()) return
+
+    // Route through server-side proxy to bypass CORS restrictions
     try {
-      const img = new Image()
-      img.crossOrigin = 'anonymous'
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => resolve()
-        img.onerror = () => reject()
-        img.src = url
-      })
-      const canvas = document.createElement('canvas')
-      canvas.width = img.naturalWidth
-      canvas.height = img.naturalHeight
-      canvas.getContext('2d')!.drawImage(img, 0, 0)
-      let dataUrl = canvas.toDataURL('image/png')
-
-      if (Math.max(img.naturalWidth, img.naturalHeight) > MAX_SAFE_DIMENSION) {
-        const confirmed = onDownsampleConfirm
-          ? await onDownsampleConfirm(img.naturalWidth, img.naturalHeight)
-          : true
-        if (confirmed) dataUrl = await downsampleDataUrl(dataUrl)
-      }
-
-      const filename = url.split('/').pop() || 'image'
-      const file = new File([new Blob()], filename, { type: 'image/png' })
-      setImage(file, dataUrl)
-      router.push(`/${locale}/editor`)
+      const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(url)}`
+      const res = await fetch(proxyUrl)
+      if (!res.ok) throw new Error(`proxy-${res.status}`)
+      const blob = await res.blob()
+      const filename = url.split('/').pop()?.split('?')[0] || 'image'
+      const file = new File([blob], filename, { type: blob.type })
+      await processFile(file, onDownsampleConfirm)
     } catch {
       toast.error('Failed to load image. Check the URL or download the image and upload it directly.')
     }
-  }, [setImage, router, locale])
+  }, [processFile])
 
   return { processFile, processUrl }
 }

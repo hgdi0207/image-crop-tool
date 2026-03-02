@@ -46,7 +46,7 @@ export const PRESET_LIST: PresetConfig[] = [
 ]
 
 export const PRESET_GROUPS: { label: string; keys: string[] }[] = [
-  { label: 'General',      keys: ['FreeForm','Custom','Square','Monitor','Widescreen','Panorama'] },
+  { label: 'General',      keys: ['Square','Monitor','Widescreen','Panorama'] },
   { label: 'Cinema',       keys: ['Film','Cinemascope'] },
   { label: 'Facebook',     keys: ['Facebookprofile','Facebookcover','Facebookpost','Facebookad'] },
   { label: 'Instagram',    keys: ['Instagramprofile','Instagrampost','Instagramstory'] },
