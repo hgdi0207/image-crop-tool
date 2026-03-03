@@ -11,14 +11,17 @@ import { Input } from '@/components/ui/input'
 import { useCropStore } from '@/store/cropStore'
 import { PRESET_LIST, PRESET_GROUPS } from '@/lib/constants'
 import type { CropMode, CropPreset } from '@/types'
+import FaceDetectPanel from '@/components/ai/FaceDetectPanel'
 
 interface Props {
   onReupload: () => void
   onCustomSize: (w: number, h: number) => void
   onHistoryPush?: () => void
+  onDetectFaces: () => void
+  onApplyFace: (faceIndex: number | 'all') => void
 }
 
-export default function LeftPanel({ onReupload, onCustomSize, onHistoryPush }: Props) {
+export default function LeftPanel({ onReupload, onCustomSize, onHistoryPush, onDetectFaces, onApplyFace }: Props) {
   const rotation = useCropStore((s) => s.rotation)
   const flipH = useCropStore((s) => s.flipH)
   const flipV = useCropStore((s) => s.flipV)
@@ -216,6 +219,9 @@ export default function LeftPanel({ onReupload, onCustomSize, onHistoryPush }: P
           </div>
         )}
       </section>
+
+      {/* ─── AI Face Detect ─── */}
+      <FaceDetectPanel onDetect={onDetectFaces} onApply={onApplyFace} />
 
       {/* ─── Re-upload ─── */}
       <div className="p-3 border-t">

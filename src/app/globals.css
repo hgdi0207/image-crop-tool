@@ -124,3 +124,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Indeterminate progress bar for AI model loading */
+@keyframes ai-progress-run {
+  0%   { left: -45%; width: 45%; }
+  100% { left: 100%; width: 45%; }
+}

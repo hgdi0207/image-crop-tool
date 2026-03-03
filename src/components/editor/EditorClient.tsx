@@ -13,6 +13,7 @@ import LeftPanel from '@/components/panels/LeftPanel'
 import ExportPanel from '@/components/export/ExportPanel'
 import { getCroppedBlob, downloadBlob } from '@/lib/exportUtils'
 import type { CropperHandle, GuideSettings } from '@/components/cropper/CropperCanvas'
+import type { FaceDetection } from '@/types'
 
 const CropperCanvas = dynamic(
   () => import('@/components/cropper/CropperCanvas'),
@@ -188,6 +189,80 @@ export default function EditorClient() {
     return () => window.removeEventListener('keydown', handler)
   }, [clearImage, router, locale, handleUndo, handleRedo])
 
+  // ─── AI face detection ────────────────────────────────────────────────────
+
+  // Terminate the worker when the editor unmounts
+  useEffect(() => {
+    return () => {
+      import('@/lib/faceDetectClient').then(({ terminateDetectWorker }) => terminateDetectWorker())
+    }
+  }, [])
+
+  const handleDetectFaces = useCallback(async () => {
+    const store = useCropStore.getState()
+    const { correctedDataUrl: url } = store
+    if (!url) return
+    store.setFaceDetectStatus('loading')
+    try {
+      const { detectFaces } = await import('@/lib/faceDetectClient')
+      const faces = await detectFaces(url, (phase) => {
+        store.setFaceDetectStatus(phase)
+      })
+      store.setFaceDetections(faces)
+      store.setFocusedFaceIndex(0)
+      store.setFaceDetectStatus('done')
+    } catch (err) {
+      console.error('[FaceDetect]', err)
+      store.setFaceDetectStatus('error')
+    }
+  }, [])
+
+  /**
+   * Apply a face bounding box (+ headroom padding) to the cropperjs crop box.
+   * Coordinates are in the corrected image's natural-pixel space.
+   */
+  const handleApplyFace = useCallback((faceIndex: number | 'all') => {
+    const { faceDetections } = useCropStore.getState()
+    const cropper = cropperHandleRef.current?.getCropper()
+    if (!cropper || faceDetections.length === 0) return
+
+    const imgData = cropper.getImageData()
+    const imgW = imgData.naturalWidth
+    const imgH = imgData.naturalHeight
+
+    let box: FaceDetection
+    if (faceIndex === 'all') {
+      const minX = Math.min(...faceDetections.map((f) => f.x))
+      const minY = Math.min(...faceDetections.map((f) => f.y))
+      const maxX = Math.max(...faceDetections.map((f) => f.x + f.width))
+      const maxY = Math.max(...faceDetections.map((f) => f.y + f.height))
+      box = { x: minX, y: minY, width: maxX - minX, height: maxY - minY, confidence: 1 }
+    } else {
+      box = faceDetections[faceIndex]
+    }
+
+    // Add headroom: generous top padding for hair, moderate on sides/bottom
+    const padX      = box.width  * 0.25
+    const padTop    = box.height * 0.45
+    const padBottom = box.height * 0.15
+
+    const x = Math.max(0, Math.round(box.x - padX))
+    const y = Math.max(0, Math.round(box.y - padTop))
+    const w = Math.min(imgW - x, Math.round(box.width  + padX * 2))
+    const h = Math.min(imgH - y, Math.round(box.height + padTop + padBottom))
+
+    // Push history, then switch to free mode (no aspect-ratio lock), then apply
+    handleHistoryPush()
+    useCropStore.getState().setCropMode('free')
+    useCropStore.getState().setSelectedPreset(null, null)
+
+    // queueCropRestore pattern: fires after CropperCanvas effects settle
+    setTimeout(() => {
+      cropper.setData({ x, y, width: w, height: h })
+      setCropVersion((v) => v + 1)
+    }, 0)
+  }, [handleHistoryPush])
+
   // ─── Zoom helpers ──────────────────────────────────────────────────────────
 
   const handleReupload = () => {
@@ -270,6 +345,8 @@ export default function EditorClient() {
           onReupload={handleReupload}
           onCustomSize={handleCustomSize}
           onHistoryPush={handleHistoryPush}
+          onDetectFaces={handleDetectFaces}
+          onApplyFace={handleApplyFace}
         />
 
         {/* Canvas area */}
