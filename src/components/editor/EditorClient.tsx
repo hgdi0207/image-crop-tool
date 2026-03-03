@@ -56,6 +56,13 @@ export default function EditorClient() {
     setZoomInputStr(String(Math.round(zoomMultiplier * 100)))
   }, [zoomMultiplier])
 
+  // Refresh preview when crop-affecting state changes that don't fire cropend
+  // (mode switch, preset select, rotation, flip). CropperCanvas effects run
+  // before EditorClient effects, so cropperjs is already updated by this point.
+  useEffect(() => {
+    setCropVersion((v) => v + 1)
+  }, [aspectRatio, rotation, flipH, flipV])
+
   // Space → temporary pan mode (desktop); release → restore previous mode
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {

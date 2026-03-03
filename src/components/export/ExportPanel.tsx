@@ -47,7 +47,13 @@ export default function ExportPanel({ cropperHandleRef, cropVersion }: Props) {
     previewCanvasRef.current.height = canvas.height
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.drawImage(canvas, 0, 0)
-    setPreviewSize({ w: canvas.width, h: canvas.height })
+    // Show actual crop pixel dimensions (from natural image), not thumbnail canvas size
+    const cropData = cropperHandleRef.current?.getCropData()
+    setPreviewSize(
+      cropData
+        ? { w: cropData.width, h: cropData.height }
+        : { w: canvas.width, h: canvas.height }
+    )
   }, [cropVersion, cropperHandleRef])
 
   // Estimate export file size (debounced)
