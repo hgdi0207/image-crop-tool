@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import {
   RotateCcw, RotateCw, FlipHorizontal2, FlipVertical2,
   RefreshCw, Upload,
@@ -24,6 +25,8 @@ interface Props {
 }
 
 export default function LeftPanel({ onReupload, onCustomSize, onHistoryPush, onDetectFaces, onApplyFace, mobileSection }: Props) {
+  const t = useTranslations('editor.panel')
+  const nav = useTranslations('nav')
   const rotation = useCropStore((s) => s.rotation)
   const flipH = useCropStore((s) => s.flipH)
   const flipV = useCropStore((s) => s.flipV)
@@ -74,7 +77,7 @@ export default function LeftPanel({ onReupload, onCustomSize, onHistoryPush, onD
       {show('adjust') && (
         <section className="p-3 border-b">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-            Adjustments
+            {t('adjustments')}
           </p>
           <div className="grid grid-cols-4 gap-1 mb-3">
             <Button
@@ -104,7 +107,7 @@ export default function LeftPanel({ onReupload, onCustomSize, onHistoryPush, onD
           </div>
           <div className="mb-3">
             <div className="flex justify-between text-xs text-muted-foreground mb-1">
-              <span>Angle</span>
+              <span>{t('angle')}</span>
               <span>{rotation}</span>
             </div>
             <div onPointerDown={() => onHistoryPush?.()}>
@@ -120,7 +123,7 @@ export default function LeftPanel({ onReupload, onCustomSize, onHistoryPush, onD
             onClick={() => { onHistoryPush?.(); resetAdjustments() }}
           >
             <RefreshCw className="w-3 h-3 mr-1" />
-            Reset
+            {t('reset')}
           </Button>
         </section>
       )}
@@ -129,7 +132,7 @@ export default function LeftPanel({ onReupload, onCustomSize, onHistoryPush, onD
       {show('crop') && (
         <section className="p-3 flex-1">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-            Crop Mode
+            {t('cropMode')}
           </p>
           <div className="flex gap-1 mb-3">
             {(['free', 'ratio', 'custom'] as CropMode[]).map((m) => (
@@ -146,7 +149,7 @@ export default function LeftPanel({ onReupload, onCustomSize, onHistoryPush, onD
                     : 'border-border hover:border-primary/60 text-muted-foreground'
                 }`}
               >
-                {m === 'ratio' ? 'Preset' : m === 'custom' ? 'Custom' : 'Free'}
+                {m === 'ratio' ? t('modePreset') : m === 'custom' ? t('modeCustom') : t('modeFree')}
               </button>
             ))}
           </div>
@@ -216,7 +219,7 @@ export default function LeftPanel({ onReupload, onCustomSize, onHistoryPush, onD
         <div className="p-3 border-t">
           <Button variant="outline" size="sm" className="w-full text-xs" onClick={onReupload}>
             <Upload className="w-3 h-3 mr-1" />
-            Re-upload
+            {nav('reupload')}
           </Button>
         </div>
       )}

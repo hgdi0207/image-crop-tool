@@ -1,73 +1,44 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Upload, Crop, Scan, Download } from 'lucide-react'
 
-const DEFAULT_STORAGE_KEY = 'imagecrop-onboarding-done'
-
-interface Step {
-  icon: React.ReactNode
-  title: string
-  desc: string
-}
-
-const STEPS: Step[] = [
-  {
-    icon: <Upload className="w-8 h-8 text-primary" />,
-    title: 'Upload Your Image',
-    desc: 'Drag & drop, paste from clipboard, or enter a URL. Supports JPG, PNG, WEBP, GIF, BMP, and SVG.',
-  },
-  {
-    icon: <Crop className="w-8 h-8 text-primary" />,
-    title: 'Crop & Adjust',
-    desc: 'Choose free-form, preset ratios, or custom dimensions. Rotate and flip with the left panel controls.',
-  },
-  {
-    icon: <Scan className="w-8 h-8 text-primary" />,
-    title: 'AI Face Detection',
-    desc: 'Click "Detect Faces" to automatically find faces. Apply a single face or all faces to set the crop box.',
-  },
-  {
-    icon: <Download className="w-8 h-8 text-primary" />,
-    title: 'Export',
-    desc: 'Choose JPG, PNG, or WEBP format. Adjust quality and filename, then download your cropped image.',
-  },
+const STEP_KEYS = ['upload', 'crop', 'ai', 'export'] as const
+const STEP_ICONS = [
+  <Upload key="upload" className="w-8 h-8 text-primary" />,
+  <Crop key="crop" className="w-8 h-8 text-primary" />,
+  <Scan key="ai" className="w-8 h-8 text-primary" />,
+  <Download key="export" className="w-8 h-8 text-primary" />,
 ]
 
+const DEFAULT_STORAGE_KEY = 'imagecrop-onboarding-done'
+
 interface Props {
-  /** First step index to show (0-based, inclusive). */
   startStep?: number
-  /** Last step index to show (0-based, inclusive). */
   endStep?: number
-  /** localStorage key used to persist completion. */
   storageKey?: string
-  /**
-   * When true, force the guide to show immediately (bypass localStorage check).
-   * Useful when a parent component controls visibility (e.g., Help button).
-   */
   forceOpen?: boolean
-  /** Called after the guide is dismissed (finished or skipped). */
   onDismiss?: () => void
 }
 
 export default function OnboardingGuide({
   startStep = 0,
-  endStep = STEPS.length - 1,
+  endStep = STEP_KEYS.length - 1,
   storageKey = DEFAULT_STORAGE_KEY,
   forceOpen = false,
   onDismiss,
 }: Props) {
+  const t = useTranslations('guide')
   const [visible, setVisible] = useState(false)
   const [stepIndex, setStepIndex] = useState(startStep)
 
-  // Auto-show on first visit (localStorage-driven)
   useEffect(() => {
     if (typeof window === 'undefined') return
     if (!localStorage.getItem(storageKey)) setVisible(true)
   }, [storageKey])
 
-  // Controlled open: when forceOpen becomes true, show and reset to startStep
   useEffect(() => {
     if (!forceOpen) return
     setStepIndex(startStep)
@@ -76,7 +47,7 @@ export default function OnboardingGuide({
 
   if (!visible) return null
 
-  const step = STEPS[stepIndex]
+  const stepKey = STEP_KEYS[stepIndex]
   const isLast = stepIndex >= endStep
 
   const handleNext = () => {
@@ -101,14 +72,14 @@ export default function OnboardingGuide({
         <button
           onClick={handleFinish}
           className="absolute top-3 right-3 text-muted-foreground hover:text-foreground text-xs"
-          aria-label="Skip guide"
+          aria-label={t('skip')}
         >
-          Skip guide ✕
+          {t('skip')} ✕
         </button>
 
         {/* Step dots */}
         <div className="flex gap-1.5 mt-1">
-          {STEPS.slice(startStep, endStep + 1).map((_, i) => (
+          {STEP_KEYS.slice(startStep, endStep + 1).map((_, i) => (
             <span
               key={i}
               className={`h-1.5 rounded-full transition-all ${
@@ -120,23 +91,23 @@ export default function OnboardingGuide({
 
         {/* Icon */}
         <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-          {step.icon}
+          {STEP_ICONS[stepIndex]}
         </div>
 
         {/* Text */}
         <div>
-          <p className="font-semibold text-base mb-1">{step.title}</p>
-          <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
+          <p className="font-semibold text-base mb-1">{t(`steps.${stepKey}.title`)}</p>
+          <p className="text-sm text-muted-foreground leading-relaxed">{t(`steps.${stepKey}.desc`)}</p>
         </div>
 
         {/* Step counter */}
         <p className="text-xs text-muted-foreground">
-          Step {stepIndex + 1} of {STEPS.length}
+          {stepIndex + 1} / {STEP_KEYS.length}
         </p>
 
         {/* Action */}
         <Button onClick={handleNext} className="w-full">
-          {isLast ? 'Get started' : 'Next →'}
+          {isLast ? t('finish') : t('next')}
         </Button>
       </div>
     </div>

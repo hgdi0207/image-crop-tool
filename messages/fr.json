@@ -1,0 +1,110 @@
+{
+  "upload": {
+    "title": "Déposez votre image ici",
+    "subtitle": "JPG · PNG · WEBP · GIF · BMP · SVG",
+    "maxSize": "20 Mo max.",
+    "chooseFile": "Choisir un fichier",
+    "or": "ou",
+    "pasteHint": "Coller une image   Ctrl+V",
+    "urlLabel": "Importer depuis une URL",
+    "urlPlaceholder": "https://...",
+    "urlImport": "Importer",
+    "batchLink": "Traiter plusieurs images →",
+    "dragActive": "Relâchez pour uploader",
+    "errors": {
+      "unsupportedFormat": "Format non supporté. Uploadez un JPG, PNG, WEBP, GIF, BMP ou SVG.",
+      "fileTooLarge": "Fichier trop volumineux. La taille maximale est de 20 Mo.",
+      "corrupted": "Impossible de lire le fichier. Il est peut-être corrompu.",
+      "urlFailed": "Impossible de charger l'image. Vérifiez l'URL ou téléchargez-la et uploadez-la directement.",
+      "downsamplePromptTitle": "Image volumineuse détectée",
+      "downsamplePromptDesc": "Cette image est grande ({width} × {height}). Nous recommandons de la réduire pour de meilleures performances.",
+      "downsampleConfirm": "Réduire et continuer",
+      "downsampleSkip": "Continuer quand même"
+    }
+  },
+  "nav": { "help": "Aide", "reupload": "Changer d'image" },
+  "theme": { "light": "Clair", "dark": "Sombre" },
+  "batch": {
+    "settings": "Paramètres",
+    "images": "Images",
+    "addMore": "Ajouter",
+    "processAll": "Tout traiter",
+    "processing": "Traitement…",
+    "downloadZip": "Télécharger ZIP",
+    "ready": "prêt",
+    "done": "Terminé",
+    "waiting": "En attente",
+    "failed": "Échec",
+    "retry": "Réessayer",
+    "edit": "Modifier"
+  },
+  "editor": {
+    "loading": "Chargement du canevas…",
+    "zoom": "Zoom",
+    "zoomReset": "Réinitialiser",
+    "pan": "Déplacer",
+    "guideGrid": "Grille",
+    "guideThirds": "Tiers",
+    "guideGolden": "Dorée",
+    "tabCrop": "Recadrage",
+    "tabAdjust": "Réglages",
+    "tabAI": "IA",
+    "tabExport": "Exporter",
+    "undo": "Annuler",
+    "save": "Sauvegarder",
+    "redo": "Rétablir",
+    "shortcutsHint": "Ctrl+Z annuler · Ctrl+Shift+Z rétablir · Ctrl+S télécharger",
+    "panel": {
+      "adjustments": "Réglages",
+      "angle": "Angle",
+      "reset": "Réinitialiser",
+      "cropMode": "Mode de recadrage",
+      "modeFree": "Libre",
+      "modePreset": "Prédéfini",
+      "modeCustom": "Personnalisé"
+    },
+    "export": {
+      "title": "Aperçu et exporter",
+      "format": "Format",
+      "quality": "Qualité",
+      "lossless": "Sans perte (qualité N/A)",
+      "filename": "Nom du fichier",
+      "bgColor": "Couleur de fond",
+      "estSize": "Taille est.",
+      "download": "Télécharger",
+      "exporting": "Exportation…"
+    },
+    "ai": {
+      "title": "Détection de visages IA",
+      "unavailable": "IA indisponible — Web Workers n'est pas pris en charge sur cet appareil.",
+      "detect": "Détecter les visages",
+      "firstUse": "La première utilisation télécharge ~200 Ko de modèles IA.",
+      "loadingModels": "Chargement des modèles IA…",
+      "detecting": "Détection des visages…",
+      "firstLoad": "Le premier chargement peut prendre 5–10 s",
+      "errorMsg": "Échec de la détection. Vérifiez que les modèles existent dans /public/models/.",
+      "errorHint": "Causes possibles : aucun visage dans l'image ou faibles performances de l'appareil.",
+      "noFaces": "Aucun visage détecté.",
+      "noFacesHint": "Essayez une photo avec un visage frontal net.",
+      "retry": "Réessayer",
+      "facesDetectedSingle": "{count} visage détecté — {conf}% conf.",
+      "facesDetectedMultiple": "{count} visages détectés — {conf}% conf.",
+      "faceNav": "Visage {current} / {total}",
+      "applyToCrop": "Appliquer au recadrage",
+      "applyAll": "Appliquer tous les visages",
+      "redetect": "Redétecter"
+    }
+  },
+  "guide": {
+    "skip": "Passer le guide",
+    "next": "Suivant",
+    "finish": "C'est parti !",
+    "restart": "Relancer le guide",
+    "steps": {
+      "upload": { "title": "Uploadez votre image", "desc": "Glissez-déposez, collez avec Ctrl+V ou importez depuis une URL. Formats : JPG, PNG, WEBP et plus." },
+      "crop": { "title": "Ajustez le recadrage", "desc": "Faites glisser les poignées pour redimensionner. Choisissez un ratio prédéfini dans le panneau gauche." },
+      "ai": { "title": "Détection de visages par IA", "desc": "Cliquez sur Détecter les visages pour localiser automatiquement les visages et cadrer l'image." },
+      "export": { "title": "Exportez l'image", "desc": "Choisissez le format (JPG / PNG / WEBP) et la qualité, puis cliquez sur Télécharger." }
+    }
+  }
+}

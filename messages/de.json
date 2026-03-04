@@ -1,0 +1,110 @@
+{
+  "upload": {
+    "title": "Bild hier ablegen",
+    "subtitle": "JPG · PNG · WEBP · GIF · BMP · SVG",
+    "maxSize": "Max. 20 MB",
+    "chooseFile": "Datei auswählen",
+    "or": "oder",
+    "pasteHint": "Bild einfügen   Ctrl+V",
+    "urlLabel": "Von URL importieren",
+    "urlPlaceholder": "https://...",
+    "urlImport": "Importieren",
+    "batchLink": "Mehrere Bilder verarbeiten →",
+    "dragActive": "Loslassen zum Hochladen",
+    "errors": {
+      "unsupportedFormat": "Nicht unterstütztes Format. Bitte JPG, PNG, WEBP, GIF, BMP oder SVG hochladen.",
+      "fileTooLarge": "Datei zu groß. Die maximale Größe beträgt 20 MB.",
+      "corrupted": "Datei konnte nicht gelesen werden. Die Datei ist möglicherweise beschädigt.",
+      "urlFailed": "Bild konnte nicht geladen werden. Überprüfe die URL oder lade das Bild herunter und lade es direkt hoch.",
+      "downsamplePromptTitle": "Großes Bild erkannt",
+      "downsamplePromptDesc": "Dieses Bild ist groß ({width} × {height}). Für bessere Performance empfehlen wir eine Verkleinerung.",
+      "downsampleConfirm": "Verkleinern und fortfahren",
+      "downsampleSkip": "Trotzdem fortfahren"
+    }
+  },
+  "nav": { "help": "Hilfe", "reupload": "Neu hochladen" },
+  "theme": { "light": "Hell", "dark": "Dunkel" },
+  "batch": {
+    "settings": "Einstellungen",
+    "images": "Bilder",
+    "addMore": "Weitere hinzufügen",
+    "processAll": "Alle verarbeiten",
+    "processing": "Verarbeitung…",
+    "downloadZip": "ZIP herunterladen",
+    "ready": "bereit",
+    "done": "Fertig",
+    "waiting": "Wartend",
+    "failed": "Fehlgeschlagen",
+    "retry": "Erneut versuchen",
+    "edit": "Bearbeiten"
+  },
+  "editor": {
+    "loading": "Canvas wird geladen…",
+    "zoom": "Zoom",
+    "zoomReset": "Zurücksetzen",
+    "pan": "Verschieben",
+    "guideGrid": "Gitter",
+    "guideThirds": "Drittel",
+    "guideGolden": "Goldene",
+    "tabCrop": "Ausschnitt",
+    "tabAdjust": "Anpassen",
+    "tabAI": "KI",
+    "tabExport": "Exportieren",
+    "undo": "Rückgängig",
+    "save": "Speichern",
+    "redo": "Wiederholen",
+    "shortcutsHint": "Ctrl+Z rückgängig · Ctrl+Shift+Z wiederholen · Ctrl+S herunterladen",
+    "panel": {
+      "adjustments": "Anpassungen",
+      "angle": "Winkel",
+      "reset": "Zurücksetzen",
+      "cropMode": "Ausschnittmodus",
+      "modeFree": "Frei",
+      "modePreset": "Vorgabe",
+      "modeCustom": "Benutzerdefiniert"
+    },
+    "export": {
+      "title": "Vorschau & Exportieren",
+      "format": "Format",
+      "quality": "Qualität",
+      "lossless": "Verlustfrei (Qualität N/A)",
+      "filename": "Dateiname",
+      "bgColor": "Hintergrundfarbe",
+      "estSize": "Gesch. Größe",
+      "download": "Herunterladen",
+      "exporting": "Exportiert…"
+    },
+    "ai": {
+      "title": "KI-Gesichtserkennung",
+      "unavailable": "KI nicht verfügbar — Web Workers wird auf diesem Gerät nicht unterstützt.",
+      "detect": "Gesichter erkennen",
+      "firstUse": "Die erste Nutzung lädt ~200 KB KI-Modelle herunter.",
+      "loadingModels": "KI-Modelle werden geladen…",
+      "detecting": "Gesichter werden erkannt…",
+      "firstLoad": "Das erste Laden kann 5–10 s dauern",
+      "errorMsg": "Erkennung fehlgeschlagen. Prüfe ob Modelle in /public/models/ vorhanden sind.",
+      "errorHint": "Mögliche Ursachen: keine Gesichter im Bild oder geringe Geräteleistung.",
+      "noFaces": "Keine Gesichter erkannt.",
+      "noFacesHint": "Versuche ein Foto mit einem klaren, frontalen Gesicht.",
+      "retry": "Erneut versuchen",
+      "facesDetectedSingle": "{count} Gesicht erkannt — {conf}% Konfidenz",
+      "facesDetectedMultiple": "{count} Gesichter erkannt — {conf}% Konfidenz",
+      "faceNav": "Gesicht {current} / {total}",
+      "applyToCrop": "Auf Ausschnitt anwenden",
+      "applyAll": "Alle Gesichter anwenden",
+      "redetect": "Erneut erkennen"
+    }
+  },
+  "guide": {
+    "skip": "Anleitung überspringen",
+    "next": "Weiter",
+    "finish": "Los geht's!",
+    "restart": "Anleitung neu starten",
+    "steps": {
+      "upload": { "title": "Bild hochladen", "desc": "Ziehen, mit Ctrl+V einfügen oder von URL importieren. Unterstützt JPG, PNG, WEBP u. v. m." },
+      "crop": { "title": "Ausschnitt anpassen", "desc": "Ziehe die Griffe zum Skalieren. Wähle ein vordefiniertes Seitenverhältnis im linken Bereich." },
+      "ai": { "title": "KI-Gesichtserkennung", "desc": "Klicke auf Gesichter erkennen, um Gesichter automatisch zu finden und den Ausschnitt anzupassen." },
+      "export": { "title": "Bild exportieren", "desc": "Wähle Format (JPG / PNG / WEBP) und Qualität, dann klicke auf Herunterladen." }
+    }
+  }
+}

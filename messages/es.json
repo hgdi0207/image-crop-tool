@@ -1,0 +1,110 @@
+{
+  "upload": {
+    "title": "Suelta tu imagen aquí",
+    "subtitle": "JPG · PNG · WEBP · GIF · BMP · SVG",
+    "maxSize": "Máx. 20 MB",
+    "chooseFile": "Elegir archivo",
+    "or": "o",
+    "pasteHint": "Pegar imagen   Ctrl+V",
+    "urlLabel": "Importar desde URL",
+    "urlPlaceholder": "https://...",
+    "urlImport": "Importar",
+    "batchLink": "Procesar varias imágenes →",
+    "dragActive": "Suelta para subir",
+    "errors": {
+      "unsupportedFormat": "Formato no compatible. Sube JPG, PNG, WEBP, GIF, BMP o SVG.",
+      "fileTooLarge": "Archivo demasiado grande. El tamaño máximo es 20 MB.",
+      "corrupted": "No se pudo leer el archivo. Puede estar dañado.",
+      "urlFailed": "No se pudo cargar la imagen. Verifica la URL o descárgala y súbela directamente.",
+      "downsamplePromptTitle": "Imagen grande detectada",
+      "downsamplePromptDesc": "Esta imagen es grande ({width} × {height}). Se recomienda reducirla para mejor rendimiento.",
+      "downsampleConfirm": "Reducir y continuar",
+      "downsampleSkip": "Continuar de todas formas"
+    }
+  },
+  "nav": { "help": "Ayuda", "reupload": "Subir otra" },
+  "theme": { "light": "Claro", "dark": "Oscuro" },
+  "batch": {
+    "settings": "Configuración",
+    "images": "Imágenes",
+    "addMore": "Añadir más",
+    "processAll": "Procesar todo",
+    "processing": "Procesando…",
+    "downloadZip": "Descargar ZIP",
+    "ready": "listo",
+    "done": "Hecho",
+    "waiting": "Esperando",
+    "failed": "Error",
+    "retry": "Reintentar",
+    "edit": "Editar"
+  },
+  "editor": {
+    "loading": "Cargando lienzo…",
+    "zoom": "Zoom",
+    "zoomReset": "Restablecer",
+    "pan": "Mover",
+    "guideGrid": "Cuadrícula",
+    "guideThirds": "Tercios",
+    "guideGolden": "Áurea",
+    "tabCrop": "Recorte",
+    "tabAdjust": "Ajustar",
+    "tabAI": "IA",
+    "tabExport": "Exportar",
+    "undo": "Deshacer",
+    "save": "Guardar",
+    "redo": "Rehacer",
+    "shortcutsHint": "Ctrl+Z deshacer · Ctrl+Shift+Z rehacer · Ctrl+S descargar",
+    "panel": {
+      "adjustments": "Ajustes",
+      "angle": "Ángulo",
+      "reset": "Restablecer",
+      "cropMode": "Modo de recorte",
+      "modeFree": "Libre",
+      "modePreset": "Predefinido",
+      "modeCustom": "Personalizado"
+    },
+    "export": {
+      "title": "Vista previa y exportar",
+      "format": "Formato",
+      "quality": "Calidad",
+      "lossless": "Sin pérdida (calidad no aplica)",
+      "filename": "Nombre de archivo",
+      "bgColor": "Color de fondo",
+      "estSize": "Tam. est.",
+      "download": "Descargar",
+      "exporting": "Exportando…"
+    },
+    "ai": {
+      "title": "Detección de rostros IA",
+      "unavailable": "IA no disponible — Web Workers no es compatible con este dispositivo.",
+      "detect": "Detectar rostros",
+      "firstUse": "El primer uso descarga ~200 KB de modelos IA.",
+      "loadingModels": "Cargando modelos IA…",
+      "detecting": "Detectando rostros…",
+      "firstLoad": "La primera carga puede tardar 5–10 s",
+      "errorMsg": "Detección fallida. Verifica que los modelos existen en /public/models/.",
+      "errorHint": "Posibles causas: no hay rostros en la imagen o bajo rendimiento del dispositivo.",
+      "noFaces": "No se detectaron rostros.",
+      "noFacesHint": "Prueba con una foto con un rostro frontal claro.",
+      "retry": "Reintentar",
+      "facesDetectedSingle": "{count} rostro detectado — {conf}% conf.",
+      "facesDetectedMultiple": "{count} rostros detectados — {conf}% conf.",
+      "faceNav": "Rostro {current} / {total}",
+      "applyToCrop": "Aplicar al recorte",
+      "applyAll": "Aplicar todos los rostros",
+      "redetect": "Volver a detectar"
+    }
+  },
+  "guide": {
+    "skip": "Saltar guía",
+    "next": "Siguiente",
+    "finish": "¡Empezar!",
+    "restart": "Reiniciar guía",
+    "steps": {
+      "upload": { "title": "Sube tu imagen", "desc": "Arrastra, pega con Ctrl+V o importa desde URL. Compatible con JPG, PNG, WEBP y más." },
+      "crop": { "title": "Ajusta el recorte", "desc": "Arrastra los bordes para redimensionar. Elige una proporción predefinida en el panel izquierdo." },
+      "ai": { "title": "Detección de rostros con IA", "desc": "Haz clic en Detectar rostros para localizar automáticamente caras y ajustar el recorte." },
+      "export": { "title": "Exporta la imagen", "desc": "Elige formato (JPG / PNG / WEBP) y calidad, luego haz clic en Descargar." }
+    }
+  }
+}

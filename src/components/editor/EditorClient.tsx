@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Scissors, Minus, Plus, Hand, Undo2, Redo2, Download } from 'lucide-react'
 import { useCropStore } from '@/store/cropStore'
 import { Button } from '@/components/ui/button'
@@ -18,10 +19,12 @@ import OnboardingGuide from '@/components/guide/OnboardingGuide'
 
 const CropperCanvas = dynamic(
   () => import('@/components/cropper/CropperCanvas'),
-  { ssr: false, loading: () => <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">Loading canvas…</div> },
+  { ssr: false, loading: () => <div className="flex-1 flex items-center justify-center"><span className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" /></div> },
 )
 
 export default function EditorClient() {
+  const t = useTranslations('editor')
+  const nav = useTranslations('nav')
   const router = useRouter()
   const params = useParams()
   const locale = (params?.locale as string) ?? 'en'
@@ -354,9 +357,9 @@ export default function EditorClient() {
               localStorage.removeItem('imagecrop-guide-editor')
               setGuideForceOpen(true)
             }}
-            title="Restart the editor guide"
+            title={t('shortcutsHint')}
           >
-            Help
+            {nav('help')}
           </Button>
         </div>
       </header>
@@ -396,7 +399,7 @@ export default function EditorClient() {
 
           {/* Zoom + guides bar */}
           <div className="h-11 border-t px-3 flex items-center gap-3 shrink-0 bg-background">
-            <span className="text-xs text-muted-foreground shrink-0">Zoom</span>
+            <span className="text-xs text-muted-foreground shrink-0">{t('zoom')}</span>
             <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={handleZoomOut}>
               <Minus className="w-3 h-3" />
             </Button>
@@ -424,7 +427,7 @@ export default function EditorClient() {
             />
             <span className="text-xs text-muted-foreground shrink-0">%</span>
             <Button variant="ghost" size="sm" className="h-6 px-2 text-xs shrink-0" onClick={handleZoomReset}>
-              Reset
+              {t('zoomReset')}
             </Button>
 
             <Button
@@ -435,7 +438,7 @@ export default function EditorClient() {
               title="Pan mode — hold Space to activate temporarily"
             >
               <Hand className="w-3 h-3" />
-              Pan
+              {t('pan')}
             </Button>
 
             <div className="h-4 border-l mx-1" />
@@ -450,7 +453,7 @@ export default function EditorClient() {
                     : 'border-border text-muted-foreground hover:border-primary/60'
                 }`}
               >
-                {g}
+                {g === 'grid' ? t('guideGrid') : g === 'thirds' ? t('guideThirds') : t('guideGolden')}
               </button>
             ))}
 
@@ -505,7 +508,7 @@ export default function EditorClient() {
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              {tab === 'crop' ? 'Crop' : tab === 'adjust' ? 'Adjust' : tab === 'ai' ? 'AI' : 'Export'}
+              {tab === 'crop' ? t('tabCrop') : tab === 'adjust' ? t('tabAdjust') : tab === 'ai' ? t('tabAI') : t('tabExport')}
             </button>
           ))}
         </div>
@@ -557,21 +560,21 @@ export default function EditorClient() {
             onClick={handleUndo} disabled={!canUndo}
           >
             <Undo2 className="w-4 h-4" />
-            Undo
+            {t('undo')}
           </Button>
           <Button
             variant="default" size="sm" className="flex-1 gap-1 text-xs mx-2"
             onClick={handleMobileDownload}
           >
             <Download className="w-4 h-4" />
-            Save
+            {t('save')}
           </Button>
           <Button
             variant="ghost" size="sm" className="flex-1 gap-1 text-xs"
             onClick={handleRedo} disabled={!canRedo}
           >
             <Redo2 className="w-4 h-4" />
-            Redo
+            {t('redo')}
           </Button>
         </div>
       </div>
@@ -601,7 +604,7 @@ export default function EditorClient() {
             </span>
           )}
         </div>
-        <span className="opacity-50 text-[10px]">Ctrl+Z undo · Ctrl+Shift+Z redo · Ctrl+S download</span>
+        <span className="opacity-50 text-[10px]">{t('shortcutsHint')}</span>
       </footer>
     </div>
   )

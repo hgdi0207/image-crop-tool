@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import { Download, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
@@ -22,6 +23,7 @@ const FORMATS: { key: ExportFormat; label: string }[] = [
 ]
 
 export default function ExportPanel({ cropperHandleRef, cropVersion }: Props) {
+  const t = useTranslations('editor.export')
   const exportFormat   = useCropStore((s) => s.exportFormat)
   const exportQuality  = useCropStore((s) => s.exportQuality)
   const exportFilename = useCropStore((s) => s.exportFilename)
@@ -92,7 +94,7 @@ export default function ExportPanel({ cropperHandleRef, cropVersion }: Props) {
     <aside className="w-64 shrink-0 border-l flex flex-col bg-background overflow-y-auto">
       <div className="p-3 border-b">
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-          Preview &amp; Export
+          {t('title')}
         </p>
 
         {/* Preview thumbnail */}
@@ -116,7 +118,7 @@ export default function ExportPanel({ cropperHandleRef, cropVersion }: Props) {
 
         {/* Format */}
         <div>
-          <p className="text-xs text-muted-foreground mb-1.5">Format</p>
+          <p className="text-xs text-muted-foreground mb-1.5">{t('format')}</p>
           <div className="flex gap-1">
             {FORMATS.map(({ key, label }) => (
               <button
@@ -137,7 +139,7 @@ export default function ExportPanel({ cropperHandleRef, cropVersion }: Props) {
         {/* Quality */}
         <div>
           <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
-            <span>Quality</span>
+            <span>{t('quality')}</span>
             <span className={exportFormat === 'png' ? 'opacity-40' : ''}>{exportQuality}%</span>
           </div>
           <Slider
@@ -148,13 +150,13 @@ export default function ExportPanel({ cropperHandleRef, cropVersion }: Props) {
             className={exportFormat === 'png' ? 'opacity-40' : ''}
           />
           {exportFormat === 'png' && (
-            <p className="text-[10px] text-muted-foreground mt-1">Lossless (quality N/A)</p>
+            <p className="text-[10px] text-muted-foreground mt-1">{t('lossless')}</p>
           )}
         </div>
 
         {/* Filename */}
         <div>
-          <p className="text-xs text-muted-foreground mb-1.5">Filename</p>
+          <p className="text-xs text-muted-foreground mb-1.5">{t('filename')}</p>
           <Input
             value={exportFilename}
             onChange={(e) => setExportFilename(e.target.value)}
@@ -166,7 +168,7 @@ export default function ExportPanel({ cropperHandleRef, cropVersion }: Props) {
         {/* BG Color (JPG only) */}
         {exportFormat === 'jpg' && (
           <div>
-            <p className="text-xs text-muted-foreground mb-1.5">Background Color</p>
+            <p className="text-xs text-muted-foreground mb-1.5">{t('bgColor')}</p>
             <div className="flex items-center gap-2">
               <input
                 type="color"
@@ -183,7 +185,7 @@ export default function ExportPanel({ cropperHandleRef, cropVersion }: Props) {
         {/* Estimated size */}
         {estimatedSize && (
           <p className="text-xs text-muted-foreground">
-            Est. size: <span className="text-foreground font-medium">{estimatedSize}</span>
+            {t('estSize')}: <span className="text-foreground font-medium">{estimatedSize}</span>
           </p>
         )}
       </div>
@@ -196,8 +198,8 @@ export default function ExportPanel({ cropperHandleRef, cropVersion }: Props) {
           disabled={downloading}
         >
           {downloading
-            ? <><Loader2 className="w-4 h-4 animate-spin" /> Exporting…</>
-            : <><Download className="w-4 h-4" /> Download</>
+            ? <><Loader2 className="w-4 h-4 animate-spin" /> {t('exporting')}</>
+            : <><Download className="w-4 h-4" /> {t('download')}</>
           }
         </Button>
       </div>
