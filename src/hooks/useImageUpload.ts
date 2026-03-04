@@ -6,11 +6,13 @@ import { useCropStore } from '@/store/cropStore'
 import { correctExifOrientation, downsampleDataUrl, getImageDimensions } from '@/lib/imageUtils'
 import { MAX_FILE_SIZE_MB, MAX_SAFE_DIMENSION } from '@/lib/constants'
 import { useRouter, useParams } from 'next/navigation'
+import type { BatchFile } from '@/types'
 
 const SUPPORTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp', 'image/svg+xml']
 
 export function useImageUpload() {
   const setImage = useCropStore((s) => s.setImage)
+  const setBatchFiles = useCropStore((s) => s.setBatchFiles)
   const router = useRouter()
   const params = useParams()
   const locale = (params?.locale as string) ?? 'en'
@@ -66,5 +68,29 @@ export function useImageUpload() {
     }
   }, [processFile])
 
-  return { processFile, processUrl }
+  /** Batch-upload multiple files → navigate to /batch */
+  const processBatchFiles = useCallback(async (files: File[]) => {
+    const valid = files.filter((f) => {
+      if (!SUPPORTED_TYPES.includes(f.type)) {
+        toast.error(`Skipped ${f.name}: unsupported format.`)
+        return false
+      }
+      if (f.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+        toast.error(`Skipped ${f.name}: file too large (max 20 MB).`)
+        return false
+      }
+      return true
+    })
+    if (valid.length === 0) return
+
+    const entries: BatchFile[] = valid.map((file) => ({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      file,
+      status: 'waiting',
+    }))
+    setBatchFiles(entries)
+    router.push(`/${locale}/batch`)
+  }, [setBatchFiles, router, locale])
+
+  return { processFile, processUrl, processBatchFiles }
 }

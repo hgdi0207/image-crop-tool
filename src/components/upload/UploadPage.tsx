@@ -9,14 +9,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Scissors, CloudUpload, Link } from 'lucide-react'
 import { useTheme } from '@/components/ThemeProvider'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
+import OnboardingGuide from '@/components/guide/OnboardingGuide'
 
 export default function UploadPage() {
   const t = useTranslations('upload')
   const nav = useTranslations('nav')
-  const { processFile, processUrl } = useImageUpload()
+  const { processFile, processUrl, processBatchFiles } = useImageUpload()
   const { theme, toggle } = useTheme()
 
   const [isDragging, setIsDragging] = useState(false)
+  const [guideForceOpen, setGuideForceOpen] = useState(false)
   const [urlValue, setUrlValue] = useState('')
   const [downsampleDialog, setDownsampleDialog] = useState<{
     open: boolean; width: number; height: number; resolve?: (v: boolean) => void
@@ -52,13 +54,15 @@ export default function UploadPage() {
   const onDrop = (e: DragEvent) => {
     e.preventDefault()
     setIsDragging(false)
-    const file = e.dataTransfer.files[0]
-    if (file) processFile(file, requestDownsampleConfirm)
+    const files = Array.from(e.dataTransfer.files)
+    if (files.length > 1) processBatchFiles(files)
+    else if (files.length === 1) processFile(files[0], requestDownsampleConfirm)
   }
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) processFile(file, requestDownsampleConfirm)
+    const files = Array.from(e.target.files ?? [])
+    if (files.length > 1) processBatchFiles(files)
+    else if (files.length === 1) processFile(files[0], requestDownsampleConfirm)
     e.target.value = ''
   }
 
@@ -68,6 +72,11 @@ export default function UploadPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <OnboardingGuide
+        startStep={0} endStep={0} storageKey="imagecrop-guide-upload"
+        forceOpen={guideForceOpen}
+        onDismiss={() => setGuideForceOpen(false)}
+      />
       {/* Navbar */}
       <header className="border-b px-6 h-14 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2 font-semibold text-lg">
@@ -79,7 +88,16 @@ export default function UploadPage() {
           <Button variant="ghost" size="icon" onClick={toggle} aria-label="Toggle theme">
             {theme === 'dark' ? '☀' : '☾'}
           </Button>
-          <Button variant="ghost" size="sm">{nav('help')}</Button>
+          <Button
+            variant="ghost" size="sm"
+            onClick={() => {
+              localStorage.removeItem('imagecrop-guide-upload')
+              setGuideForceOpen(true)
+            }}
+            title="Restart the guide"
+          >
+            {nav('help')}
+          </Button>
         </div>
       </header>
 
@@ -115,6 +133,7 @@ export default function UploadPage() {
               ref={fileInputRef}
               type="file"
               accept="image/*"
+              multiple
               className="hidden"
               onChange={onFileChange}
             />
@@ -145,8 +164,11 @@ export default function UploadPage() {
             <Button variant="outline" onClick={onUrlImport}>{t('urlImport')}</Button>
           </div>
 
-          {/* Batch link */}
-          <p className="text-center text-sm text-primary underline-offset-4 hover:underline cursor-pointer">
+          {/* Batch link — opens multi-select file picker */}
+          <p
+            className="text-center text-sm text-primary underline-offset-4 hover:underline cursor-pointer"
+            onClick={() => fileInputRef.current?.click()}
+          >
             {t('batchLink')}
           </p>
         </div>

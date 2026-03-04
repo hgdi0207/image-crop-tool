@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { Scissors, Minus, Plus, Hand, Undo2, Redo2 } from 'lucide-react'
+import { Scissors, Minus, Plus, Hand, Undo2, Redo2, Download } from 'lucide-react'
 import { useCropStore } from '@/store/cropStore'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
@@ -14,6 +14,7 @@ import ExportPanel from '@/components/export/ExportPanel'
 import { getCroppedBlob, downloadBlob } from '@/lib/exportUtils'
 import type { CropperHandle, GuideSettings } from '@/components/cropper/CropperCanvas'
 import type { FaceDetection } from '@/types'
+import OnboardingGuide from '@/components/guide/OnboardingGuide'
 
 const CropperCanvas = dynamic(
   () => import('@/components/cropper/CropperCanvas'),
@@ -43,6 +44,8 @@ export default function EditorClient() {
   const [cropDimensions, setCropDimensions] = useState({ w: 0, h: 0 })
   const [dragMode, setDragMode] = useState<'none' | 'move'>('none')
   const [cropVersion, setCropVersion] = useState(0)
+  const [mobileTab, setMobileTab] = useState<'crop' | 'adjust' | 'ai' | 'export'>('crop')
+  const [guideForceOpen, setGuideForceOpen] = useState(false)
 
   const cropperHandleRef = useRef<CropperHandle | null>(null)
   const spaceBeforeModeRef = useRef<'none' | 'move' | null>(null)
@@ -300,6 +303,13 @@ export default function EditorClient() {
       setZoomInputStr(String(Math.round(zoomMultiplier * 100)))
     }
   }
+  const handleMobileDownload = useCallback(() => {
+    const canvas = cropperHandleRef.current?.getCroppedCanvas()
+    if (!canvas) return
+    const { exportFormat: fmt, exportQuality: q, exportFilename: fn, exportBgColor: bg } = useCropStore.getState()
+    getCroppedBlob(canvas, fmt, q, bg).then((blob) => downloadBlob(blob, fn, fmt))
+  }, [])
+
   const handleCustomSize = (w: number, h: number) => {
     const c = cropperHandleRef.current?.getCropper()
     if (!c) return
@@ -321,6 +331,11 @@ export default function EditorClient() {
 
   return (
     <div className="h-screen flex flex-col bg-background text-foreground overflow-hidden">
+      <OnboardingGuide
+        startStep={1} endStep={3} storageKey="imagecrop-guide-editor"
+        forceOpen={guideForceOpen}
+        onDismiss={() => setGuideForceOpen(false)}
+      />
 
       {/* ─── Navbar ─── */}
       <header className="border-b px-4 h-12 flex items-center justify-between shrink-0">
@@ -333,12 +348,21 @@ export default function EditorClient() {
           <Button variant="ghost" size="icon" onClick={toggle} className="h-8 w-8" aria-label="Toggle theme">
             {theme === 'dark' ? '☀' : '☾'}
           </Button>
-          <Button variant="ghost" size="sm" className="text-xs h-8">Help</Button>
+          <Button
+            variant="ghost" size="sm" className="text-xs h-8"
+            onClick={() => {
+              localStorage.removeItem('imagecrop-guide-editor')
+              setGuideForceOpen(true)
+            }}
+            title="Restart the editor guide"
+          >
+            Help
+          </Button>
         </div>
       </header>
 
-      {/* ─── Main (three-column) ─── */}
-      <div className="flex-1 flex min-h-0">
+      {/* ─── Desktop: three-column (hidden on mobile) ─── */}
+      <div className="hidden md:flex flex-1 min-h-0">
 
         {/* Left panel */}
         <LeftPanel
@@ -448,8 +472,112 @@ export default function EditorClient() {
         />
       </div>
 
-      {/* ─── Status bar ─── */}
-      <footer className="border-t h-9 px-4 flex items-center justify-between shrink-0 bg-background text-xs text-muted-foreground">
+      {/* ─── Mobile layout (hidden on desktop) ─── */}
+      <div className="flex md:hidden flex-1 flex-col min-h-0">
+        {/* Canvas area */}
+        <div className="h-[50vh] relative overflow-hidden bg-muted/40 shrink-0">
+          <CropperCanvas
+            src={correctedDataUrl}
+            aspectRatio={aspectRatio}
+            rotation={rotation}
+            flipH={flipH}
+            flipV={flipV}
+            guides={guides}
+            showCheckerboard={!!isTransparent}
+            dragMode={effectiveDragMode}
+            onCropData={(w, h) => setCropDimensions({ w, h })}
+            onZoomChange={setZoomMultiplier}
+            onReady={(handle) => { cropperHandleRef.current = handle }}
+            onCropStart={handleCropStart}
+            onCropEnd={handleCropEnd}
+          />
+        </div>
+
+        {/* 4-tab navigation bar */}
+        <div className="flex border-b shrink-0 bg-background">
+          {(['crop', 'adjust', 'ai', 'export'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setMobileTab(tab)}
+              className={`flex-1 py-2 text-xs font-medium capitalize transition-colors ${
+                mobileTab === tab
+                  ? 'border-b-2 border-primary text-primary'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {tab === 'crop' ? 'Crop' : tab === 'adjust' ? 'Adjust' : tab === 'ai' ? 'AI' : 'Export'}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab content */}
+        <div className="flex-1 overflow-y-auto min-h-0">
+          {mobileTab === 'crop' && (
+            <LeftPanel
+              mobileSection="crop"
+              onReupload={handleReupload}
+              onCustomSize={handleCustomSize}
+              onHistoryPush={handleHistoryPush}
+              onDetectFaces={handleDetectFaces}
+              onApplyFace={handleApplyFace}
+            />
+          )}
+          {mobileTab === 'adjust' && (
+            <LeftPanel
+              mobileSection="adjust"
+              onReupload={handleReupload}
+              onCustomSize={handleCustomSize}
+              onHistoryPush={handleHistoryPush}
+              onDetectFaces={handleDetectFaces}
+              onApplyFace={handleApplyFace}
+            />
+          )}
+          {mobileTab === 'ai' && (
+            <LeftPanel
+              mobileSection="ai"
+              onReupload={handleReupload}
+              onCustomSize={handleCustomSize}
+              onHistoryPush={handleHistoryPush}
+              onDetectFaces={handleDetectFaces}
+              onApplyFace={handleApplyFace}
+            />
+          )}
+          {mobileTab === 'export' && (
+            <ExportPanel
+              cropperHandleRef={cropperHandleRef}
+              cropVersion={cropVersion}
+            />
+          )}
+        </div>
+
+        {/* Bottom action bar */}
+        <div className="h-12 border-t flex items-center justify-around shrink-0 bg-background px-4">
+          <Button
+            variant="ghost" size="sm" className="flex-1 gap-1 text-xs"
+            onClick={handleUndo} disabled={!canUndo}
+          >
+            <Undo2 className="w-4 h-4" />
+            Undo
+          </Button>
+          <Button
+            variant="default" size="sm" className="flex-1 gap-1 text-xs mx-2"
+            onClick={handleMobileDownload}
+          >
+            <Download className="w-4 h-4" />
+            Save
+          </Button>
+          <Button
+            variant="ghost" size="sm" className="flex-1 gap-1 text-xs"
+            onClick={handleRedo} disabled={!canRedo}
+          >
+            <Redo2 className="w-4 h-4" />
+            Redo
+          </Button>
+        </div>
+      </div>
+
+      {/* ─── Status bar (desktop only) ─── */}
+      <footer className="hidden md:flex border-t h-9 px-4 items-center justify-between shrink-0 bg-background text-xs text-muted-foreground">
         <div className="flex items-center gap-1">
           <Button
             variant="ghost" size="icon" className="h-6 w-6"

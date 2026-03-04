@@ -29,5 +29,43 @@
   "theme": {
     "light": "Light",
     "dark": "Dark"
+  },
+  "batch": {
+    "settings": "Batch Settings",
+    "images": "Images",
+    "addMore": "Add More",
+    "processAll": "Process All",
+    "processing": "Processing…",
+    "downloadZip": "Download ZIP",
+    "ready": "ready",
+    "done": "Done",
+    "waiting": "Waiting",
+    "failed": "Failed",
+    "retry": "Retry",
+    "edit": "Edit"
+  },
+  "guide": {
+    "skip": "Skip guide",
+    "next": "Next",
+    "finish": "Got it!",
+    "restart": "Restart guide",
+    "steps": {
+      "upload": {
+        "title": "Upload your image",
+        "desc": "Drag & drop, paste with Ctrl+V, or import from a URL. Supports JPG, PNG, WEBP and more."
+      },
+      "crop": {
+        "title": "Adjust the crop box",
+        "desc": "Drag handles to resize, drag inside to reposition. Pick a preset ratio from the left panel."
+      },
+      "ai": {
+        "title": "AI face detection",
+        "desc": "Click 'Detect Faces' to auto-locate faces and snap the crop box around them."
+      },
+      "export": {
+        "title": "Export your image",
+        "desc": "Choose format (JPG / PNG / WEBP) and quality, then click Download to save your crop."
+      }
+    }
   }
 }

@@ -53,7 +53,9 @@ async function ensureFaceapi(): Promise<AnyFaceapi> {
 
 async function ensureModels(fa: AnyFaceapi): Promise<void> {
   if (modelsLoaded) return
-  await fa.nets.tinyFaceDetector.loadFromUri('/models')
+  // Worker has no implicit base URL — must use an absolute URL.
+  // self.location.origin == the page's origin (e.g. http://localhost:3000).
+  await fa.nets.tinyFaceDetector.loadFromUri(self.location.origin + '/models')
   modelsLoaded = true
 }
 

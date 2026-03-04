@@ -4,6 +4,7 @@ import { routing } from '@/i18n/routing'
 import { getMessages } from 'next-intl/server'
 import { Toaster } from '@/components/ui/sonner'
 import ThemeProvider from '@/components/ThemeProvider'
+import ErrorBoundary from '@/components/ErrorBoundary'
 
 export default async function LocaleLayout({
   children,
@@ -19,10 +20,12 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <ThemeProvider>
-        {children}
-        <Toaster position="top-center" richColors />
-      </ThemeProvider>
+      <ErrorBoundary>
+        <ThemeProvider>
+          {children}
+          <Toaster position="top-center" richColors />
+        </ThemeProvider>
+      </ErrorBoundary>
     </NextIntlClientProvider>
   )
 }
