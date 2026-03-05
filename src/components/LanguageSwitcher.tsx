@@ -1,6 +1,8 @@
 'use client'
 
 import { useLocale } from 'next-intl'
+import { usePathname, useRouter } from '@/i18n/navigation'
+import { useTransition } from 'react'
 
 const LOCALES = [
   { code: 'en', label: 'English' },
@@ -12,11 +14,14 @@ const LOCALES = [
 
 export default function LanguageSwitcher() {
   const currentLocale = useLocale()
+  const pathname = usePathname()
+  const router = useRouter()
+  const [, startTransition] = useTransition()
 
   const switchLocale = (code: string) => {
-    const segments = window.location.pathname.split('/')
-    segments[1] = code
-    window.location.href = segments.join('/')
+    startTransition(() => {
+      router.replace(pathname, { locale: code })
+    })
   }
 
   return (

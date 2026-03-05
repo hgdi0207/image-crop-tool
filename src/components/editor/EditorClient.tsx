@@ -257,15 +257,20 @@ export default function EditorClient() {
     const w = Math.min(imgW - x, Math.round(box.width  + padX * 2))
     const h = Math.min(imgH - y, Math.round(box.height + padTop + padBottom))
 
-    // Push history, then switch to free mode (no aspect-ratio lock), then apply
+    // Push history, then switch to free mode (no aspect-ratio lock), then apply.
+    // setCropMode/setSelectedPreset trigger React re-renders whose useEffects call
+    // cropperjs setAspectRatio(NaN) → initCropBox(), resetting the crop box.
+    // rAF fires after all pending React renders/effects for the current frame,
+    // so setData reliably runs last and wins.
     handleHistoryPush()
     useCropStore.getState().setCropMode('free')
     useCropStore.getState().setSelectedPreset(null, null)
 
-    // queueCropRestore pattern: fires after CropperCanvas effects settle
     setTimeout(() => {
-      cropper.setData({ x, y, width: w, height: h })
-      setCropVersion((v) => v + 1)
+      requestAnimationFrame(() => {
+        cropper.setData({ x, y, width: w, height: h })
+        setCropVersion((v) => v + 1)
+      })
     }, 0)
   }, [handleHistoryPush])
 
