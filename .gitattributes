@@ -1,0 +1,3 @@
+# Treat all model weight files as binary to prevent CRLF corruption
+public/models/*-shard* binary
+public/models/*.bin binary
