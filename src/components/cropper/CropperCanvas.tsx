@@ -63,11 +63,16 @@ export default function CropperCanvas({
   const initZoomRef = useRef<number | null>(null)
   const [cropBox, setCropBox] = useState<CropBoxPos>({ left: 0, top: 0, width: 0, height: 0 })
 
-  // Apply aspect ratio when it changes
+  // Apply aspect ratio when it changes.
+  // cropperjs's setAspectRatio() internally calls initCropBox() which resets the
+  // crop box position to the canvas center. Save and restore the current crop data
+  // so the box stays where it was (or where setData placed it via setTimeout+rAF).
   useEffect(() => {
     const c = cropperRef.current?.cropper
     if (!c || !readyRef.current) return
+    const saved = c.getData()
     c.setAspectRatio(aspectRatio ?? NaN)
+    c.setData(saved)
   }, [aspectRatio])
 
   // Apply drag mode (crop = adjust crop box, move = pan canvas)
