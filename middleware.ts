@@ -4,5 +4,7 @@ import { routing } from './src/i18n/routing'
 export default createMiddleware(routing)
 
 export const config = {
-  matcher: ['/((?!_next|_vercel|.*\\..*).*)'],
+  // Exclude _next, _vercel, files with extensions, and /models/ (public AI model files
+  // have no extension and would otherwise be mistaken for locale routes)
+  matcher: ['/((?!_next|_vercel|models/|.*\\..*).*)'],
 }
