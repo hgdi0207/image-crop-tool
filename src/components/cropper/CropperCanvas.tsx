@@ -12,6 +12,8 @@ export interface CropperHandle {
   getCroppedCanvas: (opts?: Cropper.GetCroppedCanvasOptions) => HTMLCanvasElement | null
   getCropData: () => CropData | null
   queueCropRestore: (data: CropData | null) => void
+  /** Synchronously remove aspect-ratio constraint and apply face crop coordinates. */
+  applyFaceCrop: (x: number, y: number, width: number, height: number) => void
 }
 
 interface CropBoxPos {
@@ -141,6 +143,15 @@ export default function CropperCanvas({
           if (!cr) return
           cr.setData({ x: data.x, y: data.y, width: data.width, height: data.height })
         }, 0)
+      },
+      applyFaceCrop: (x, y, width, height) => {
+        const cr = cropperRef.current?.cropper
+        if (!cr) return
+        // Synchronously remove constraint then set crop — no setTimeout needed.
+        // The aspectRatio useEffect will fire later but our save-restore logic
+        // in that effect will preserve the face crop position.
+        cr.setAspectRatio(NaN)
+        cr.setData({ x, y, width, height })
       },
     })
   }

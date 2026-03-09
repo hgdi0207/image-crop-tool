@@ -257,21 +257,16 @@ export default function EditorClient() {
     const w = Math.min(imgW - x, Math.round(box.width  + padX * 2))
     const h = Math.min(imgH - y, Math.round(box.height + padTop + padBottom))
 
-    // Push history, then switch to free mode (no aspect-ratio lock), then apply.
-    // setCropMode/setSelectedPreset trigger React re-renders whose useEffects call
-    // cropperjs setAspectRatio(NaN) → initCropBox(), resetting the crop box.
-    // rAF fires after all pending React renders/effects for the current frame,
-    // so setData reliably runs last and wins.
+    // Synchronously apply: applyFaceCrop removes the aspect-ratio constraint and
+    // sets crop data in one call before any React re-render can interfere.
+    // The Zustand mode updates that follow may trigger a useEffect re-run of
+    // setAspectRatio, but CropperCanvas's save-restore logic in that effect
+    // preserves the face crop position regardless of execution order.
     handleHistoryPush()
+    cropperHandleRef.current?.applyFaceCrop(x, y, w, h)
     useCropStore.getState().setCropMode('free')
     useCropStore.getState().setSelectedPreset(null, null)
-
-    setTimeout(() => {
-      requestAnimationFrame(() => {
-        cropper.setData({ x, y, width: w, height: h })
-        setCropVersion((v) => v + 1)
-      })
-    }, 0)
+    setCropVersion((v) => v + 1)
   }, [handleHistoryPush])
 
   // ─── Zoom helpers ──────────────────────────────────────────────────────────
