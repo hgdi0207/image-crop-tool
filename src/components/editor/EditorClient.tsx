@@ -50,7 +50,28 @@ export default function EditorClient() {
   const [mobileTab, setMobileTab] = useState<'crop' | 'adjust' | 'ai' | 'export'>('crop')
   const [guideForceOpen, setGuideForceOpen] = useState(false)
 
-  const cropperHandleRef = useRef<CropperHandle | null>(null)
+  // Two separate CropperCanvas instances exist (desktop + mobile layouts).
+  // We keep individual refs and expose a combined handle so setter operations
+  // (applyFaceCrop, queueCropRestore, setZoom) apply to both, while getters
+  // use whichever instance is available.
+  const desktopCropperRef = useRef<CropperHandle | null>(null)
+  const mobileCropperRef  = useRef<CropperHandle | null>(null)
+  const cropperHandleRef  = useRef<CropperHandle | null>(null)
+
+  const syncCombinedRef = () => {
+    const d = desktopCropperRef.current
+    const m = mobileCropperRef.current
+    if (!d && !m) { cropperHandleRef.current = null; return }
+    cropperHandleRef.current = {
+      getCropper:       () => d?.getCropper() ?? m?.getCropper(),
+      setZoom:          (mult) => { d?.setZoom(mult); m?.setZoom(mult) },
+      getCroppedCanvas: (opts) => (d ?? m)!.getCroppedCanvas(opts),
+      getCropData:      () => (d ?? m)!.getCropData(),
+      queueCropRestore: (data) => { d?.queueCropRestore(data); m?.queueCropRestore(data) },
+      applyFaceCrop:    (x, y, w, h) => { d?.applyFaceCrop(x, y, w, h); m?.applyFaceCrop(x, y, w, h) },
+    }
+  }
+
   const spaceBeforeModeRef = useRef<'none' | 'move' | null>(null)
 
   // Redirect to upload if no image is loaded
@@ -391,7 +412,7 @@ export default function EditorClient() {
               dragMode={effectiveDragMode}
               onCropData={(w, h) => setCropDimensions({ w, h })}
               onZoomChange={setZoomMultiplier}
-              onReady={(handle) => { cropperHandleRef.current = handle }}
+              onReady={(handle) => { desktopCropperRef.current = handle; syncCombinedRef() }}
               onCropStart={handleCropStart}
               onCropEnd={handleCropEnd}
             />
@@ -490,7 +511,7 @@ export default function EditorClient() {
             dragMode={effectiveDragMode}
             onCropData={(w, h) => setCropDimensions({ w, h })}
             onZoomChange={setZoomMultiplier}
-            onReady={(handle) => { cropperHandleRef.current = handle }}
+            onReady={(handle) => { mobileCropperRef.current = handle; syncCombinedRef() }}
             onCropStart={handleCropStart}
             onCropEnd={handleCropEnd}
           />
